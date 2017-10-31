@@ -100,7 +100,9 @@ def test_optimize(optimize):
     learning_rate = tf.placeholder(tf.float32)
     logits, train_op, cross_entropy_loss = optimize(layers_output, correct_label, learning_rate, num_classes)
 
-    _assert_tensor_shape(logits, [2*3*4, num_classes], 'Logits')
+    # As mentioned in https://discussions.udacity.com/t/here-is-some-advice-and-clarifications-about-the-semantic-segmentation-project/403100
+    # reshaping is not necessary
+    _assert_tensor_shape(logits, shape, 'Logits')
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
