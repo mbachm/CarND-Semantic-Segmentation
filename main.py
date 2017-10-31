@@ -51,8 +51,69 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :param num_classes: Number of classes to classify
     :return: The Tensor for the last layer of output
     """
-    # TODO: Implement function
-    return None
+    # 1x1 convolution of vgg_layer7_out
+    conv_1x1_layer7 = tf.layers.conv2d(vgg_layer7_out,
+                                       num_classes,
+                                       1,
+                                       padding= 'same',
+                                       kernel_initializer= tf.random_normal_initializer(stddev=0.01),
+                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+
+    # upsample
+    layer4_in1 = tf.layers.conv2d_transpose(conv_1x1_layer7,
+                                             num_classes,
+                                             4,
+                                             strides= (2, 2),
+                                             padding= 'same',
+                                             kernel_initializer= tf.random_normal_initializer(stddev=0.01),
+                                             kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+
+    # scale pool4
+    # inspired by https://discussions.udacity.com/t/here-is-some-advice-and-clarifications-about-the-semantic-segmentation-project/403100
+    pool4_out_scaled = tf.multiply(vgg_layer4_out, 0.01, name='pool4_out_scaled')
+    # 1x1 convolution of vgg_layer4_out
+    layer4_in2 = tf.layers.conv2d(pool4_out_scaled,
+                                       num_classes,
+                                       1,
+                                       padding= 'same',
+                                       kernel_initializer= tf.random_normal_initializer(stddev=0.01),
+                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+
+    # skip connection
+    conv_1x1_layer4 = tf.add(layer4_in1, layer4_in2)
+
+    # upsample
+    layer3_in1 = tf.layers.conv2d_transpose(conv_1x1_layer4,
+                                            num_classes,
+                                            4,
+                                            strides= (2, 2),
+                                            padding= 'same',
+                                            kernel_initializer= tf.random_normal_initializer(stddev=0.01),
+                                            kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+
+    # scale pool3
+    # inspired by https://discussions.udacity.com/t/here-is-some-advice-and-clarifications-about-the-semantic-segmentation-project/403100
+    pool3_out_scaled = tf.multiply(vgg_layer3_out, 0.0001, name='pool3_out_scaled')
+    layer3_in2 = tf.layers.conv2d(pool3_out_scaled,
+                                  num_classes,
+                                  1,
+                                  padding= 'same',
+                                  kernel_initializer= tf.random_normal_initializer(stddev=0.01),
+                                  kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+
+    # skip connection
+    conv_1x1_layer3 = tf.add(layer3_in1, layer3_in2)
+
+    # upsample
+    last_layer = tf.layers.conv2d_transpose(conv_1x1_layer3,
+                                            num_classes,
+                                            4,
+                                            strides= (2, 2),
+                                            padding= 'same',
+                                            kernel_initializer= tf.random_normal_initializer(stddev=0.01),
+                                            kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+
+    return last_layer
 tests.test_layers(layers)
 
 
