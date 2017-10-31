@@ -1,4 +1,10 @@
-# Semantic Segmentation
+# Semantic Segmentation Project
+Self-Driving Car Engineer Nanodegree Program
+
+## Overview
+---
+This is my implementation of the elective project (advanced deep learning) of term 3 of the Udacity - Self-Driving Car NanoDegree . You can find the original repo under [CarND-Semantic-Segmentation](https://github.com/udacity/CarND-Semantic-Segmentation).
+
 ### Introduction
 In this project, you'll label the pixels of a road in images using a Fully Convolutional Network (FCN).
 
