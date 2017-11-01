@@ -56,7 +56,6 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                        num_classes,
                                        1,
                                        padding= 'same',
-                                       kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                        kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
 
     # upsample
@@ -65,7 +64,6 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                              4,
                                              strides= (2, 2),
                                              padding= 'same',
-                                             kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                              kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
 
     # scale pool4
@@ -76,7 +74,6 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                        num_classes,
                                        1,
                                        padding= 'same',
-                                       kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                        kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
 
     # skip connection
@@ -88,7 +85,6 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                             4,
                                             strides= (2, 2),
                                             padding= 'same',
-                                            kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                             kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
 
     # scale pool3
@@ -98,7 +94,6 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                   num_classes,
                                   1,
                                   padding= 'same',
-                                  kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                   kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
 
     # skip connection
@@ -107,10 +102,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # upsample
     last_layer = tf.layers.conv2d_transpose(conv_1x1_layer3,
                                             num_classes,
-                                            4,
-                                            strides= (2, 2),
+                                            16,
+                                            strides= (8, 8),
                                             padding= 'same',
-                                            kernel_initializer= tf.random_normal_initializer(stddev=0.01),
                                             kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
 
     return last_layer
@@ -193,7 +187,7 @@ def run():
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
-        EPOCHS = 50
+        EPOCHS = 20
         BATCH_SIZE = 128
 
         # Build NN using load_vgg, layers, and optimize function
