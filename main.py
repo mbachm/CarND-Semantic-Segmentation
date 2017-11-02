@@ -120,18 +120,19 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :param num_classes: Number of classes to classify
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
-    # As mentioned in https://discussions.udacity.com/t/here-is-some-advice-and-clarifications-about-the-semantic-segmentation-project/403100
-    # reshaping is not necessary. Instead, we have to adjust the loss function loss function
-    # see https://stackoverflow.com/questions/46615623/do-we-need-to-add-the-regularization-loss-into-the-total-loss-in-tensorflow-mode
-    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits= nn_last_layer,
-                                                                                labels= correct_label))
+
+    logits = tf.reshape(nn_last_layer, (-1, num_classes))
+    labels = tf.reshape(correct_label, (-1, num_classes))
+
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits= logits,
+                                                                                labels= labels))
     reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     loss = cross_entropy_loss + sum(reg_losses)
 
     optimizer = tf.train.AdamOptimizer(learning_rate= learning_rate)
     train_op = optimizer.minimize(loss)
 
-    return nn_last_layer, train_op, loss
+    return logits, train_op, loss
 tests.test_optimize(optimize)
 
 
