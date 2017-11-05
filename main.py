@@ -55,26 +55,29 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     conv_1x1_layer7 = tf.layers.conv2d(vgg_layer7_out,
                                        num_classes,
                                        1,
-                                       padding= 'same',
-                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                       padding='same',
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                       kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
 
     # upsample
     layer4_in1 = tf.layers.conv2d_transpose(conv_1x1_layer7,
-                                             num_classes,
-                                             4,
-                                             strides= (2, 2),
-                                             padding= 'same',
-                                             kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                            num_classes,
+                                            4,
+                                            strides=(2, 2),
+                                            padding='same',
+                                            kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
 
     # scale pool4
     # inspired by https://discussions.udacity.com/t/here-is-some-advice-and-clarifications-about-the-semantic-segmentation-project/403100
     pool4_out_scaled = tf.multiply(vgg_layer4_out, 0.01, name='pool4_out_scaled')
     # 1x1 convolution of vgg_layer4_out
     layer4_in2 = tf.layers.conv2d(pool4_out_scaled,
-                                       num_classes,
-                                       1,
-                                       padding= 'same',
-                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                  num_classes,
+                                  1,
+                                  padding= 'same',
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
 
     # skip connection
     conv_1x1_layer4 = tf.add(layer4_in1, layer4_in2)
@@ -83,9 +86,10 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     layer3_in1 = tf.layers.conv2d_transpose(conv_1x1_layer4,
                                             num_classes,
                                             4,
-                                            strides= (2, 2),
-                                            padding= 'same',
-                                            kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                            strides=(2, 2),
+                                            padding='same',
+                                            kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
 
     # scale pool3
     # inspired by https://discussions.udacity.com/t/here-is-some-advice-and-clarifications-about-the-semantic-segmentation-project/403100
@@ -94,7 +98,8 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                   num_classes,
                                   1,
                                   padding= 'same',
-                                  kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
 
     # skip connection
     conv_1x1_layer3 = tf.add(layer3_in1, layer3_in2)
@@ -103,9 +108,10 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     last_layer = tf.layers.conv2d_transpose(conv_1x1_layer3,
                                             num_classes,
                                             16,
-                                            strides= (8, 8),
-                                            padding= 'same',
-                                            kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                            strides=(8, 8),
+                                            padding='same',
+                                            kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
+                                            kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
 
     return last_layer
 tests.test_layers(layers)
@@ -124,8 +130,8 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     logits = tf.reshape(nn_last_layer, (-1, num_classes))
     labels = tf.reshape(correct_label, (-1, num_classes))
 
-    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits= logits,
-                                                                                labels= labels))
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,
+                                                                                labels=labels))
     reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     loss = cross_entropy_loss + sum(reg_losses)
 
@@ -158,7 +164,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
       print("EPOCH {} ...".format(i+1))
       for image, label in get_batches_fn(batch_size):
         _, loss = sess.run([train_op, cross_entropy_loss],
-                           feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.0009})
+                           feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 1e-4})
         print("Loss: = {:.3f}".format(loss))
       print()
     pass
@@ -189,7 +195,7 @@ def run():
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
         EPOCHS = 20
-        BATCH_SIZE = 128
+        BATCH_SIZE = 4
 
         # Build NN using load_vgg, layers, and optimize function
         correct_label = tf.placeholder(tf.int32, [None, None, None, num_classes], name='correct_label')
